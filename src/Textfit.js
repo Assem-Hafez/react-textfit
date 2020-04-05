@@ -17,7 +17,7 @@ function assertElementFitsHeight(el, height) {
     return el.scrollHeight - 1 <= height;
 }
 
-function noop() {}
+function noop() { }
 
 export default class TextFit extends React.Component {
     static propTypes = {
@@ -122,7 +122,7 @@ export default class TextFit extends React.Component {
         let low = min;
         let high = max;
 
-        this.setState({ ready: false});
+        this.setState({ ready: false });
 
         series([
             // Step 1:
@@ -151,14 +151,18 @@ export default class TextFit extends React.Component {
                 low = min;
                 high = mid;
                 return whilst(
-                    () => low < high,
+                    () => {
+                        const roundedLow = Math.round(low * 1000) / 1000;
+                        const roundedHigh = Math.round(high * 1000) / 1000;
+                        return roundedLow < roundedHigh && roundedLow !== roundedHigh;
+                    },
                     whilstCallback => {
                         if (shouldCancelProcess()) return whilstCallback(true);
-                        mid = parseInt((low + high) / 2, 10);
+                        mid = (low + high) / 2;
                         this.setState({ fontSize: mid }, () => {
                             if (pid !== this.pid) return whilstCallback(true);
-                            if (testSecondary()) low = mid + 1;
-                            else high = mid - 1;
+                            if (testSecondary()) low = mid;
+                            else high = mid;
                             return whilstCallback();
                         });
                     },
